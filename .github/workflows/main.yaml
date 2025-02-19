@@ -1,0 +1,89 @@
+name: Push commit
+on: 
+  push:
+    paths-ignore:
+      - '**/*.tar.gz'
+jobs:
+  report:
+    runs-on: ubuntu-24.04-arm
+    
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.ACTION_TOKEN }}
+      - name: Install Deps
+        run: |
+            # update repos, install updates
+            # sudo apt update -y
+            # sudo apt upgrade -y
+
+            # make sure required software is installed
+            sudo apt install software-properties-common wget xz-utils gcc build-essential clang make cmake -y
+            sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu g++-aarch64-linux-gnu -y
+            sudo apt install python3 python3-pip -y
+            sudo apt install gpiod libgpiod-dev -y
+            sudo apt install fakeroot gettext-base -y
+      - name: Clean Files
+        run: |
+            if [ -f target.tar.gz ]; then git rm target.tar.gz; fi
+      - name: Install FlatBuffers
+        run: |
+            # manually install flatbuffers header files bc its not packaged properly
+            if [ -d flatbuffers ]; then rm -rf flatbuffers; fi
+            curl -sSfL https://github.com/google/flatbuffers/archive/refs/tags/v24.12.23.tar.gz -o flatbuffers.tar.gz
+            tar -xzf flatbuffers.tar.gz
+
+            ls -al flatbuffers-24.12.23
+
+            mv flatbuffers-24.12.23 ~/flatbuffers
+
+            # symlink include directory
+            if [ ! -L /usr/include/flatbuffers/ ]; then sudo ln -s ~/flatbuffers/include/flatbuffers/ /usr/include/flatbuffers; fi
+
+            rm -f flatbuffers.tar.gz
+            rm -rf flatbuffers
+      - name: Install WiringPI
+        run: |
+          # # clone wiring pi 
+          # git clone https://github.com/WiringPi/WiringPi.git --recursive
+          # cd WiringPi
+
+          # # build from source
+          # ./build debian
+
+          # # give access to apt
+          # sudo chown -Rv _apt:root /var/cache/apt/archives/partial/
+          # sudo chmod -Rv 700 /var/cache/apt/archives/partial/
+
+          # # install wiring pi
+          # mv debian-template/wiringpi*.deb .
+          # sudo apt install ./wiringpi*.deb
+
+          # # post install clean
+          # cd .. 
+          # rm -rf WiringPi/
+
+          curl -sSfL https://github.com/WiringPi/WiringPi/releases/download/3.14/wiringpi_3.14_arm64.deb -o wiringpi.deb
+          sudo apt install ./wiringpi.deb
+
+          rm -f wiringpi.deb
+      - name: Build Files
+        run: |
+          # git config --global user.name 'action'
+          # git config --global user.email 'action@github.com'
+
+          git submodule update --init --recursive --remote --force
+
+          make build
+          tar -czvf target.tar.gz target/
+      - name: Commit report
+        run: |       
+          git config --global user.name 'RPI WiFi Controller Auto-Build'
+          git config --global user.email 'action@github.com'
+
+          git add target.tar.gz || exit 0
+
+          git commit -am "automated: build action" || exit 0
+          git push
