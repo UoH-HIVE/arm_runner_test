@@ -11,7 +11,6 @@ CFLAGS_PROD = -std=$(STD) -flto -Wall -Wextra -O3 -l wiringPi -march=aarch64-lin
 
 DIR_SRC = ./src/
 DIR_TARGET = ./target/
-DIR_SCRIPTS = ./scripts/
 
 MAIN = main.cpp
 TARGET = main.out
@@ -39,8 +38,6 @@ build:
 	@echo "$(CC) $(CFLAGS_PROD) $(SRC) -o $(DIR_TARGET)$(TARGET)"
 	@aarch64-linux-gnu-g++ $(SRC) -o $(DIR_TARGET)$(TARGET) $(CFLAGS_TEST)
 	@echo "Build complete."
-	@echo "Copying scripts..."
-	@cp $(DIR_SCRIPTS)/* $(DIR_TARGET)
 	@for file in *.out *.sh; do if [ -e "$file" ]; then chmod +x "$file"; fi; done
 
 run: 
