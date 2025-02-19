@@ -10,9 +10,9 @@ jobs:
     steps:
       - name: Checkout 
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-          token: ${{ secrets.ACTION_TOKEN }}
+        # with:
+        #   submodules: 'recursive'
+        #   token: ${{ secrets.ACTION_TOKEN }}
       - name: Install Deps
         run: |
             # update repos, install updates
