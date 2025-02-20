@@ -55,3 +55,33 @@ clean:
 	@echo "Cleaning..."
 	@rm -rf $(DIR_TARGET)
 	@$(MAKE) -f $(THIS_FILE) setup
+
+VERSION_FILE = VERSION
+
+bump_major:
+	@echo "Bumping major version..."
+	@$(eval VERSION=$(shell cat $(VERSION_FILE)))
+	@$(eval MAJOR=$(shell echo $(VERSION) | cut -d. -f1))
+	@$(eval MINOR=$(shell echo $(VERSION) | cut -d. -f2))
+	@$(eval NEW_MAJOR=$(shell echo $$(($(MAJOR) + 1))))
+	@echo "$(NEW_MAJOR).0" > $(VERSION_FILE)
+	@echo "Version bumped to $(NEW_MAJOR).0"
+
+bump_minor:
+	@echo "Bumping minor version..."
+	@$(eval VERSION=$(shell cat $(VERSION_FILE)))
+	@$(eval MAJOR=$(shell echo $(VERSION) | cut -d. -f1))
+	@$(eval MINOR=$(shell echo $(VERSION) | cut -d. -f2))
+	@$(eval NEW_MINOR=$(shell echo $$(($(MINOR) + 1))))
+	@echo "$(MAJOR).$(NEW_MINOR)" > $(VERSION_FILE)
+	@echo "Version bumped to $(MAJOR).$(NEW_MINOR)"
+
+bump_patch:
+	@echo "Bumping patch version..."
+	@$(eval VERSION=$(shell cat $(VERSION_FILE)))
+	@$(eval MAJOR=$(shell echo $(VERSION) | cut -d. -f1))
+	@$(eval MINOR=$(shell echo $(VERSION) | cut -d. -f2))
+	@$(eval PATCH=$(shell echo $(VERSION) | cut -d. -f3))
+	@$(eval NEW_PATCH=$(shell echo $$(($(PATCH) + 1))))
+	@echo "$(MAJOR).$(MINOR).$(NEW_PATCH)" > $(VERSION_FILE)
+	@echo "Version bumped to $(MAJOR).$(MINOR).$(NEW_PATCH)"
