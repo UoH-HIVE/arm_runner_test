@@ -3,8 +3,8 @@ on:
   push:
     paths-ignore:
       - '**/*.tar.gz'
-    tags:
-    - '*'
+    # tags:
+    # - '*'
 jobs:
   report:
     runs-on: ubuntu-24.04-arm
